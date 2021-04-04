@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Planet.gd" type="Script" id=1]
+
+[node name="Planet" type="Spatial"]
+script = ExtResource( 1 )
+resolution = 40
+shape_radius = 1.0
+color_planet = Color( 0.47451, 0.160784, 0.160784, 1 )
