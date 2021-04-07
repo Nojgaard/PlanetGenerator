@@ -1,5 +1,0 @@
-﻿  SurfaceGenerator.cpp
-D:\Program Files\Godot\Projects\NicolaProject\native_src\SurfaceGenerator.cpp(31,35): warning C4244: 'argument': conversion from 'double' to 'real_t', possible loss of data
-D:\Program Files\Godot\Projects\NicolaProject\native_src\SurfaceGenerator.cpp(47,72): warning C4244: 'argument': conversion from 'double' to 'real_t', possible loss of data
-D:\Program Files\Godot\Projects\NicolaProject\native_src\SurfaceGenerator.cpp(47,104): warning C4244: 'argument': conversion from 'double' to 'real_t', possible loss of data
-  native_src.vcxproj -> D:\Program Files\Godot\Projects\NicolaProject\bin\win\native_src.dll
