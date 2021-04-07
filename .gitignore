@@ -1,1 +1,14 @@
 .import/
+bin/
+native_src/.vs/  
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+bin/win
+bin/x11
+
+.import/
+.vs/
+.mono/

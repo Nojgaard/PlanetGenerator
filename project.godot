@@ -8,9 +8,20 @@
 
 config_version=4
 
-_global_script_classes=[  ]
+_global_script_classes=[ {
+"base": "Resource",
+"class": "AA_NoiseFilter",
+"language": "GDScript",
+"path": "res://scenes/planet/NoiseFilter.gd"
+}, {
+"base": "GradientTexture",
+"class": "AA_SurfaceColor",
+"language": "GDScript",
+"path": "res://scenes/planet/SurfaceColor.gd"
+} ]
 _global_script_class_icons={
-
+"AA_NoiseFilter": "",
+"AA_SurfaceColor": ""
 }
 
 [application]

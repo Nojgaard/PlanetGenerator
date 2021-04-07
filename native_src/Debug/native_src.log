@@ -1,0 +1,14 @@
+﻿  gdlibrary.cpp
+  PlanetSurface.cpp
+  Generating Code...
+     Creating library ..\bin\native_src.lib and object ..\bin\native_src.exp
+gdlibrary.obj : error LNK2019: unresolved external symbol "public: static void __cdecl godot::Godot::gdnative_init(struct godot_gdnative_init_options *)" (?gdnative_init@Godot@godot@@SAXPAUgodot_gdnative_init_options@@@Z) referenced in function _godot_gdnative_init
+gdlibrary.obj : error LNK2019: unresolved external symbol "public: static void __cdecl godot::Godot::gdnative_terminate(struct godot_gdnative_terminate_options *)" (?gdnative_terminate@Godot@godot@@SAXPAUgodot_gdnative_terminate_options@@@Z) referenced in function _godot_gdnative_terminate
+gdlibrary.obj : error LNK2019: unresolved external symbol "public: static void __cdecl godot::Godot::nativescript_init(void *)" (?nativescript_init@Godot@godot@@SAXPAX@Z) referenced in function _godot_nativescript_init
+gdlibrary.obj : error LNK2019: unresolved external symbol "void __cdecl godot::_TagDB::register_type(unsigned int,unsigned int)" (?register_type@_TagDB@godot@@YAXII@Z) referenced in function "void __cdecl godot::register_class<class godot::PlanetSurface>(void)" (??$register_class@VPlanetSurface@godot@@@godot@@YAXXZ)
+gdlibrary.obj : error LNK2001: unresolved external symbol _nativescript_api
+gdlibrary.obj : error LNK2001: unresolved external symbol _nativescript_1_1_api
+gdlibrary.obj : error LNK2001: unresolved external symbol "public: static void * godot::_RegisterState::nativescript_handle" (?nativescript_handle@_RegisterState@godot@@2PAXA)
+gdlibrary.obj : error LNK2001: unresolved external symbol "private: static void * godot::Object::_detail_class_tag" (?_detail_class_tag@Object@godot@@0PAXA)
+D:\Program Files\Godot\Projects\godot-cpp\bin\libgodot-cpp.windows.debug.64.lib : warning LNK4272: library machine type 'x64' conflicts with target machine type 'x86'
+..\bin\native_src.dll : fatal error LNK1120: 8 unresolved externals

@@ -1,8 +1,10 @@
 tool
 extends Spatial
 
+const MeshTest = preload("res://scenes/planet/Surface.gd")
 const TerrainFace = preload("res://TerrainFace.gd")
 const SurfaceGenerator = preload("res://SurfaceGenerator.gd")
+const SurfaceGeneratorFast = preload("res://bin/SurfaceGenerator.gdns")
 
 export(int, 2, 256) var resolution = 10 setget set_resolution
 
@@ -57,10 +59,13 @@ func _ready():
 func construct_mesh():
 	terrain_faces = []
 	var surface_generator = SurfaceGenerator.new(shape_radius)
+	var sg = SurfaceGeneratorFast.new()
+	sg.radius = shape_radius
+	sg.resolution = resolution
+	var time_start = OS.get_ticks_msec()
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	
-	var t = get_transform()
+#	var time_start = OS.get_ticks_msec()
 	var directions = [
 		Vector3(1,0,0),
 		Vector3(-1,0,0),
@@ -71,13 +76,18 @@ func construct_mesh():
 		]
 	for dir in directions:
 		terrain_faces.append(TerrainFace.new(st, resolution, dir))
-		
+
+	var offset = 0
 	for face in terrain_faces:
-		face.construct_mesh(surface_generator)
-	
-	st.index()
+		face.construct_mesh(surface_generator, offset)
+		offset += 1
+
+#	st.index()
 	st.generate_normals()
-	
+#	sg.generate_mesh(st)
+	var time_end = OS.get_ticks_msec()
+
+	print("ELAPSED_TIME ", (time_end - time_start))
 	var material = SpatialMaterial.new()    
 	material.albedo_color = color_planet
 	st.set_material(material)

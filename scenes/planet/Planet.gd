@@ -1,14 +1,18 @@
 tool
 extends Spatial
 
+export(Resource) var test
+var NoiseFilter = preload("res://scenes/planet/NoiseFilter.cs")
+var Surface = preload("res://scenes/planet/Surface.cs")
 var has_mesh_changed = false
 var has_color_changed = false
 
 var resolution = 10 setget set_resolution
 var shape_radius = 1.0 setget set_radius
 var color_surface = Color(1,0,0,1) setget set_color_surface
+var shape_smooth = true setget set_shape_smooth
 
-export(Array, Resource) var noise_filters
+export(Array, Resource) var noise_filters setget set_noise_filters
 export(GradientTexture) var color_settings: GradientTexture
 
 	
@@ -34,6 +38,7 @@ func _get_property_list():
 	add_property(properties, "resolution", TYPE_INT, PROPERTY_HINT_RANGE, "2, 200, 1")
 	add_group(properties, "Shape", "shape")
 	add_property(properties, "shape_radius", TYPE_REAL)
+	add_property(properties, "shape_smooth", TYPE_BOOL)
 	add_group(properties, "Color", "color")
 	add_property(properties, "color_surface", TYPE_COLOR)
 	
@@ -41,31 +46,49 @@ func _get_property_list():
 
 func set_resolution(new_resolution):
 	resolution = new_resolution
-	if is_inside_tree():
-		$Surface.generate_mesh()
+	has_mesh_changed = true
 	
 func set_radius(new_radius):
 	shape_radius = new_radius
-	if is_inside_tree():
-		$Surface.generate_mesh()
+	has_mesh_changed = true
 	
 	
 func set_color_surface(new_color):
 	color_surface = new_color
-		
+	
+func set_shape_smooth(val):
+	shape_smooth = val
+	_on_mesh_changed()
+
+func set_noise_filters(val):
+	noise_filters = val
+	for i in noise_filters.size():
+		var nf = NoiseFilter.new()
+		if noise_filters[i] == null:
+			noise_filters[i] = nf
+			noise_filters[i].connect("changed", self, "_on_mesh_changed")
+	print("changed")
 
 func _on_mesh_changed():
 	has_mesh_changed = true
 	
 func _on_color_changed():
 	print("IM CONNECTED")
+
+func _on_noise_changed():
+	print("Noise Changed")
 	
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	if test == null:
+		test = NoiseFilter.new()
+	test.connect("changed", self, "_on_noise_changed")
+	
 	for nf in noise_filters:
 		nf.connect("changed", self, "_on_mesh_changed")
 	color_settings.connect("changed", self, "_on_color_changed")
+	print($Surface)
 	$Surface.generate_mesh()
 	
 

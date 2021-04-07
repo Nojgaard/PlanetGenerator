@@ -12,13 +12,13 @@ func calc_elevation(point: Vector3):
 	var first_layer = -1
 	for nf in get_parent().noise_filters:
 		if first_layer == -1:
-			first_layer = nf.evaluate(point)
-			if nf.is_enabled:
+			first_layer = nf.Evaluate(point)
+			if nf.IsEnabled:
 				elevation = first_layer
 		else:
-			if not nf.is_enabled: continue
-			var mask = first_layer if nf.use_mask else 1
-			elevation += nf.evaluate(point) * mask
+			if not nf.IsEnabled: continue
+			var mask = first_layer if nf.UseMask else 1
+			elevation += nf.Evaluate(point) * mask
 			
 	return elevation
 
@@ -73,6 +73,7 @@ func generate_mesh():
 
 	var start = OS.get_ticks_msec()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.add_smooth_group(get_parent().shape_smooth)
 	var offset = 0
 	for local_up in directions:
 		generate_face(st, local_up, offset)
