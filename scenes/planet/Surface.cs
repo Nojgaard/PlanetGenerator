@@ -5,16 +5,13 @@ using System.Collections.Generic;
 [Tool]
 public class Surface : MeshInstance
 {
-    private int resolution = 10;
+    private int resolution = 50;
     [Export]
     public int Resolution
     {
         get { return resolution; }
         set { resolution = value; onMeshChanged(); }
     }
-    private NoiseFilter[] noiseFilters;
-    private float radius = 1;
-    private float minElevation, maxElevation;
 
     private Vector3[] vertices;
     private int[] triangles;
@@ -28,6 +25,9 @@ public class Surface : MeshInstance
     [Export]
     SurfaceColor surfaceColor = (SurfaceColor)GD.Load("res://scenes/planet/SurfaceColor.cs").Call("new");
 
+    [Export]
+    SurfaceShape surfaceShape = (SurfaceShape)GD.Load("res://scenes/planet/SurfaceShape.cs").Call("new");
+
     private Vector3[] GetDirections()
     {
         return new Vector3[] {
@@ -35,30 +35,6 @@ public class Surface : MeshInstance
             new Vector3(0, 1, 0), new Vector3(0, -1, 0),
             new Vector3(0, 0, 1), new Vector3(0, 0, -1)
         };
-    }
-    private float CalcUnscaledElevation(Vector3 point)
-    {
-        if (noiseFilters.Length == 0) { return 0; }
-
-        float elevation = 0;
-        float firstLayer = noiseFilters[0].Evaluate(point);
-        if (noiseFilters[0].IsEnabled) { elevation = firstLayer; }
-        for (int i = 1; i < noiseFilters.Length; ++i)
-        {
-            if (!noiseFilters[i].IsEnabled) { continue; }
-            float mask = (noiseFilters[i].UseMask) ? firstLayer : 1;
-            elevation += noiseFilters[i].Evaluate(point) * mask;
-        }
-        minElevation = Math.Min(minElevation, elevation);
-        maxElevation = Math.Max(maxElevation, elevation);
-        return elevation;
-    }
-
-    private float CalcElevation(float unscaledElevation)
-    {
-        var unScaledElevation = Math.Max(0, unscaledElevation);
-        var elevation = (1 + unScaledElevation) * radius;
-        return elevation;
     }
 
     private void GenerateNormals(int vFrom, int vTo, int tFrom, int tTo)
@@ -95,8 +71,8 @@ public class Surface : MeshInstance
                 var pointOnUnitCube = localUp + (percent.x - .5f) * 2 * axisA + (percent.y - .5f) * 2 * axisB;
                 var pointOnUnitSphere = pointOnUnitCube.Normalized();
                 //var point = CalcPointOnSphere(pointOnUnitSphere);
-                var unscaledElevation = CalcUnscaledElevation(pointOnUnitSphere);
-                vertices[vertexOffset] = pointOnUnitSphere * CalcElevation(unscaledElevation);
+                var unscaledElevation = surfaceShape.CalcUnscaledElevation(pointOnUnitSphere);
+                vertices[vertexOffset] = pointOnUnitSphere * surfaceShape.CalcElevation(unscaledElevation);
                 uvs[vertexOffset].y = unscaledElevation;
 
 
@@ -165,7 +141,7 @@ public class Surface : MeshInstance
             MaterialOverride = mat;
             //SetSurfaceMaterial(0, mat);
         }
-        surfaceColor.UpdateShader(mat, minElevation, maxElevation);
+        surfaceColor.UpdateShader(mat, surfaceShape.MinElevation, surfaceShape.MaxElevation);
     }
 
     private ArrayMesh GetMeshArray()
@@ -176,13 +152,8 @@ public class Surface : MeshInstance
     public void GenerateMesh()
     {
         if (resolution == 0) { return; }
-        minElevation = int.MaxValue;
-        maxElevation = int.MinValue;
-        ///resolution = (int)GetParent().Get("resolution");
-        radius = (float)GetParent().Get("shape_radius");
-        var noiseResources = (Godot.Collections.Array)GetParent().Get("noise_filters");
-        noiseFilters = new NoiseFilter[noiseResources.Count];
-        noiseResources.CopyTo(noiseFilters, 0);
+
+        surfaceShape.Init();
 
         var directions = GetDirections();
 
@@ -192,18 +163,11 @@ public class Surface : MeshInstance
         normals = new Vector3[numVertices * directions.Length];
         triangles = new int[numTriangles * directions.Length];
         uvs = new Vector2[numVertices * directions.Length];
-        //seamMap = new Dictionary<Vector3, List<int>>();
 
         System.Threading.Tasks.Parallel.For(0, directions.Length, i =>
         {
             GenerateFace(directions[i], numVertices * i, numTriangles * i);
         });
-        /*for (int i = 0; i < directions.Length; ++i)
-        {
-            GenerateFace(directions[i], numVertices * i, numTriangles * i);
-        }*/
-
-        //GenerateNormals(0, numVertices * directions.Length, 0, numTriangles * directions.Length);
     }
 
     public void CommitSurface()
@@ -240,6 +204,8 @@ public class Surface : MeshInstance
     {
         Mesh = new ArrayMesh();
         surfaceColor.Connect("changed", this, "onMaterialChanged");
+        surfaceShape.Connect("changed", this, "onMeshChanged");
+        surfaceShape.InitConnections();
         GenerateMesh();
         GenerateUvs();
         CommitSurface();
