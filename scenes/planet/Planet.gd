@@ -1,7 +1,8 @@
 tool
 extends Spatial
 
-export(Resource) var test
+var SurfaceColor2 = preload("res://scenes/planet/SurfaceColor.cs")
+var BiomeColor = preload("res://scenes/planet/BiomeColor.cs")
 var NoiseFilter = preload("res://scenes/planet/NoiseFilter.cs")
 var Surface = preload("res://scenes/planet/Surface.cs")
 var has_mesh_changed = false
@@ -14,6 +15,7 @@ var shape_smooth = true setget set_shape_smooth
 
 export(Array, Resource) var noise_filters setget set_noise_filters
 export(GradientTexture) var color_settings: GradientTexture
+export(GradientTexture) var biome_test
 
 	
 func add_group(props, group_name, group_hint):
@@ -35,7 +37,7 @@ func add_property(props, name, type, hint = PROPERTY_HINT_NONE, hint_string = ""
 	
 func _get_property_list():
 	var properties = []
-	add_property(properties, "resolution", TYPE_INT, PROPERTY_HINT_RANGE, "2, 200, 1")
+	add_property(properties, "resolution", TYPE_INT, PROPERTY_HINT_RANGE, "2, 256, 1")
 	add_group(properties, "Shape", "shape")
 	add_property(properties, "shape_radius", TYPE_REAL)
 	add_property(properties, "shape_smooth", TYPE_BOOL)
@@ -46,11 +48,11 @@ func _get_property_list():
 
 func set_resolution(new_resolution):
 	resolution = new_resolution
-	has_mesh_changed = true
+	_on_mesh_changed()
 	
 func set_radius(new_radius):
 	shape_radius = new_radius
-	has_mesh_changed = true
+	_on_mesh_changed()
 	
 	
 func set_color_surface(new_color):
@@ -71,6 +73,7 @@ func set_noise_filters(val):
 
 func _on_mesh_changed():
 	has_mesh_changed = true
+	$Surface.meshChanged = true
 	
 func _on_color_changed():
 	print("IM CONNECTED")
@@ -78,24 +81,28 @@ func _on_color_changed():
 func _on_noise_changed():
 	print("Noise Changed")
 	
+func _on_update_surface():
+	$Surface.materialChanged = true
+	
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	if test == null:
-		test = NoiseFilter.new()
-	test.connect("changed", self, "_on_noise_changed")
+	if biome_test == null:
+		biome_test = SurfaceColor2.new()
+	#test.connect("changed", self, "_on_noise_changed")
 	
 	for nf in noise_filters:
 		nf.connect("changed", self, "_on_mesh_changed")
+	
+	biome_test.connect("changed", self, "_on_update_surface")
 	color_settings.connect("changed", self, "_on_color_changed")
-	print($Surface)
-	$Surface.generate_mesh()
 	
 
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	return
 	if Engine.editor_hint and has_mesh_changed:
 		has_mesh_changed = false
 		var start = OS.get_ticks_msec()
